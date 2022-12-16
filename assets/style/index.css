@@ -9,9 +9,10 @@ body {
     font-family: 'Source Code Pro', sans-serif;
 }
 .title {
-    color: #fefefe;
+    color: #03e9f4;
     position: absolute;
-    text-transform: uppercase;
+    text-transform: capitalize;
+    font-variant: all-petite-caps;
     top: 10%;
     left: 0;
     right: 0;
@@ -20,7 +21,7 @@ body {
     font-size: 2rem;
     font-weight: lighter;
     animation: fadeIn;
-    animation-duration: 12s;
+    animation-duration: 6s;
 }
 .logo {
     width: auto;
@@ -33,7 +34,7 @@ body {
 .table {
     z-index: 999;
     animation: zoomIn;
-    animation-duration: 2s;
+    animation-duration: 4s;
 }
 
 .flex {
@@ -83,6 +84,7 @@ body {
     align-items: center;
     font-size: 1rem;
     transition: opacity 400ms;
+    cursor: pointer;
 }
 
 .box:hover {
@@ -91,6 +93,8 @@ body {
     background: rgba(225, 225, 225, .4);
     border: 1px solid rgba(255, 255, 255, .8);
     text-shadow: 0 0 5px #03e9f4, 0 0 25px #03e9f4, 0 0 50px #03e9f4, 0 0 100px #03e9f4;
+    animation: pulse;
+    animation-duration: 1s;
 }
 
 .hidden {
