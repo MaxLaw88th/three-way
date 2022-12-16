@@ -19,6 +19,8 @@ body {
     text-align: center;
     font-size: 2rem;
     font-weight: lighter;
+    animation: fadeIn;
+    animation-duration: 12s;
 }
 .logo {
     width: auto;
@@ -26,6 +28,12 @@ body {
     position: absolute;
     left: 24px;
     top: 24px;
+}
+
+.table {
+    z-index: 999;
+    animation: zoomIn;
+    animation-duration: 2s;
 }
 
 .flex {
