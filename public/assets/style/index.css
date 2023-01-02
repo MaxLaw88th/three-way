@@ -1,5 +1,5 @@
 body {
-    background: linear-gradient(0deg,#000,#1b1033);
+    background: linear-gradient(0deg, #000, #1b1033);
     display: flex;
     justify-content: center;
     align-items: center;
@@ -8,6 +8,7 @@ body {
     margin: 0;
     font-family: 'Source Code Pro', sans-serif;
 }
+
 .title {
     color: #03e9f4;
     position: absolute;
@@ -20,9 +21,10 @@ body {
     text-align: center;
     font-size: 2rem;
     font-weight: lighter;
-    animation: fadeIn;
-    animation-duration: 6s;
+    /*animation: fadeIn;*/
+    /*animation-duration: 6s;*/
 }
+
 .logo {
     width: auto;
     height: auto;
@@ -33,12 +35,14 @@ body {
 
 .table {
     z-index: 999;
-    animation: zoomIn;
-    animation-duration: 4s;
+    margin: 10px;
+    /*animation: zoomIn;*/
+    /*animation-duration: 4s;*/
 }
 
 .flex {
     display: flex;
+    float: left;
 }
 
 .column {
@@ -77,7 +81,6 @@ body {
     width: 64px;
     height: 64px;
     background: rgba(48, 48, 48, .1);
-    color: white;
     display: flex;
     opacity: .8;
     justify-content: center;
@@ -85,9 +88,71 @@ body {
     font-size: 1rem;
     transition: opacity 400ms;
     cursor: pointer;
+    color: white;
 }
 
-.box:hover {
+.line-box {
+    box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    -webkit-box-sizing: border-box;
+    border: 1px solid rgba(255, 255, 255, .6);
+    width: calc(64px * 4);
+    height: 64px;
+    background: rgba(48, 48, 48, .1);
+    display: flex;
+    opacity: .8;
+    justify-content: center;
+    align-items: center;
+    font-size: 1rem;
+    transition: opacity 400ms;
+    cursor: pointer;
+    color: white;
+}
+
+.box.game-cell {
+    color: white;
+}
+
+.box.modifier {
+    color: gray;
+}
+
+.box.values, .line-box.values {
+    color: gray;
+}
+
+.box.values.active {
+    color: white;
+}
+
+.box.chosen {
+    color: white;
+    background: rgba(225, 225, 225, .4);
+    border: 1px solid rgba(255, 255, 255, .8);
+}
+
+.box.resolved {
+    color: #23f403;
+    text-shadow: 0 0 5px #23f403, 0 0 25px #23f403, 0 0 50px #23f403, 0 0 100px #23f403;
+}
+
+.box.resolved:hover {
+    color: #23f403;
+    opacity: 1;
+    background: rgba(225, 225, 225, .4);
+    border: 1px solid rgba(255, 255, 255, .8);
+    text-shadow: 0 0 5px #23f403, 0 0 25px #23f403, 0 0 50px #23f403, 0 0 100px #23f403;
+}
+
+.box.highlighted {
+    color: #f40303;
+    text-shadow: 0 0 5px #f40303, 0 0 25px #f40303, 0 0 50px #f40303, 0 0 100px #f40303;
+    opacity: 1;
+    background: rgba(225, 225, 225, .4);
+    border: 1px solid rgba(255, 255, 255, .8);
+}
+
+.box.idle:hover, .line-box.idle:hover {
     color: #03e9f4;
     opacity: 1;
     background: rgba(225, 225, 225, .4);
