@@ -1,32 +1,13 @@
 import {useEffect, useState} from "react";
 import {difficultiesLevels, getInitialGameFiledCells, getInitialsModifiers} from "./Utilities.jsx";
+import {GameFieldCell} from "./components/GameFieldCell.jsx";
+import {GameModifierCell} from "./components/GameModifierCell.jsx";
 
-
-export const GameFieldCell = ({cell, onOver, onOut}) => {
-    const {value, finalValue, highlighted} = cell;
-    return <div
-        onMouseOver={onOver}
-        onMouseOut={onOut}
-        className={`box game-cell ${value === finalValue ? "resolved" : "idle"} ${highlighted ? 'highlighted' : ''}`}
-    >
-        {value}
-    </div>;
-}
-export const GameModifierCell = ({cell, onOver, onOut, onClick}) => {
-
-    const {value, active, modify, highlighted, chosen} = cell;
-
-    return <div
-        onClick={onClick}
-        onMouseOver={() => active ? onOver(modify) : null}
-        onMouseOut={() => onOut(modify)}
-        className={`box idle modifier ${highlighted ? 'highlighted' : ''} ${chosen ? 'chosen' : ''}`}
-    >
-        {value}
-    </div>;
-}
 let timerSet;
+
 const App = () => {
+
+    //region states
     const [gameLevel, setGameLevel] = useState(0);
 
     const [gameFieldCells, setGameFieldCells] = useState(getInitialGameFiledCells());
@@ -46,7 +27,9 @@ const App = () => {
     const [victory, setVictory] = useState(false);
 
     const [flawlessVictory, setFlawlessVictory] = useState(false)
+    //endregion
 
+    //region effects
     useEffect(() => {
         if (gameFieldCells.every(el => el.value === el.finalValue) && gameModifiers.every(el => (el.value <= 9 && el.value >= -9))) {
             console.log({
@@ -92,6 +75,12 @@ const App = () => {
 
     }, [chosenModifier])
 
+    useEffect(() => {
+        console.log(movesDone)
+    }, [movesDone])
+    //endregion
+
+    //region handlers
     const changeGameLevel = (level) => {
 
         const newGameModifiers = getInitialsModifiers(level);
@@ -167,10 +156,6 @@ const App = () => {
         )
     }
 
-    useEffect(() => {
-        console.log(movesDone)
-    }, [movesDone])
-
     const undoMove = () => {
         let toUndo = [...movesDone].reverse().findIndex(move => !move.undone);
 
@@ -216,7 +201,6 @@ const App = () => {
         }
     };
 
-
     const chooseModifier = (pos) => () => {
         if (gameModifiers?.[pos]?.active)
             setChosenModifier(pos);
@@ -225,8 +209,9 @@ const App = () => {
     const invertValues = () => {
         setValues(actValues => [...actValues].map(val => -val));
     }
+    //endregion
 
-
+    //region factories
     const makeGameCell = pos =>
         <GameFieldCell
             onOver={highlightModifiers(pos)}
@@ -242,7 +227,9 @@ const App = () => {
             cell={gameModifiers[pos]}
         />;
     const makeModifierValue = pos => <div className={`box idle values ${chosenModifier !== null ? 'active' : ''}`} onClick={onAddModifierValue(pos)}>{values[pos]}</div>
+    //endregion
 
+    //region render
     return <div>
         <div className="flex column table">
             <div className="flex" id="row-1">
@@ -327,6 +314,7 @@ const App = () => {
             </div>
         </div>
     </div>;
+    //endregion
 };
 
 export default App
