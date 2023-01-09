@@ -1,318 +1,226 @@
 import {useEffect, useState} from "react";
-import {difficultiesLevels, getInitialGameFiledCells, getInitialsModifiers} from "./Utilities.jsx";
-import {GameFieldCell} from "./components/GameFieldCell.jsx";
-import {GameModifierCell} from "./components/GameModifierCell.jsx";
-
-let timerSet;
+import {difficultiesLevels, getInitialGameFiledCells, getInitialsModifiers, initialGameFieldCells, initialModifiers} from "./utils/index.jsx";
+import {useTimer} from "./hooks/useTimer.jsx";
+import {GameGridContainer, GameHelpersContainer} from "./components/index.js";
 
 const App = () => {
-
     //region states
-    const [gameLevel, setGameLevel] = useState(0);
 
-    const [gameFieldCells, setGameFieldCells] = useState(getInitialGameFiledCells());
-
-    const [gameModifiers, setGameModifiers] = useState(getInitialsModifiers(gameLevel));
-
-    const [chosenModifier, setChosenModifier] = useState(null);
-
-    const [values, setValues] = useState([1, 2, 3, 4, 5, 6, 7, 8, 9]);
-
+    // la partita (è/non è) cominciata
+    const [started, setStarted] = useState(false);
+    // quante mosse sono state fatte
     const [moves, setMoves] = useState(0);
-
-    const [timePassed, setTimePassed] = useState(0);
-
-    const [movesDone, setMovesDone] = useState([]);
-
+    // la partita (è/non è) stata vinta
     const [victory, setVictory] = useState(false);
+    // la vittoria (è/non è) stata impeccabile:
+    // sono state compiute al più il numero di mosse
+    // equivalente ai modificatori applicati
+    const [flawlessVictory, setFlawlessVictory] = useState(false);
+    // custom hook per gestire il timer
+    const [timePassed, , stopTimer, resetTimer] = useTimer();
 
-    const [flawlessVictory, setFlawlessVictory] = useState(false)
+    //livello del gioco
+    const [gameLevel, setGameLevel] = useState(null);
+
+    // celle del campo da gioco
+    const [gameFieldCells, setGameFieldCells] = useState([...initialGameFieldCells]);
+    // celle dei modificatori
+    const [gameModifiers, setGameModifiers] = useState([...initialModifiers]);
+
+    // modificatore attivo
+    const [chosenModifier, setChosenModifier] = useState(null);
+    // valori applicabili
+    const [values, setValues] = useState([1, 2, 3, 4, 5, 6, 7, 8, 9]);
+    // storico delle mosse (registra il modificatore, il valore e se questa mossa è stata annullata)
+    const [movesDone, setMovesDone] = useState([]);
     //endregion
 
     //region effects
-    useEffect(() => {
-        if (gameFieldCells.every(el => el.value === el.finalValue) && gameModifiers.every(el => (el.value <= 9 && el.value >= -9))) {
-            console.log({
-                movesDone,
-                moves,
-                tot: difficultiesLevels[gameLevel].filter(el => el).length
-            })
-            clearInterval(timerSet);
-            setVictory(true)
-            if (moves <= difficultiesLevels[gameLevel].filter(el => el).length) {
-                setFlawlessVictory(true);
-            }
-        }
 
-    }, [gameFieldCells])
-
+    // al cambio di livello
     useEffect(() => {
-        if (timerSet)
-            clearInterval(timerSet);
-        timerSet = setInterval(() => setTimePassed(t => ++t), 1000);
-        return () => clearInterval(timerSet)
+        if (gameLevel === null) return;
+        restartGame();
     }, [gameLevel])
 
+    // al cambio di una casella
     useEffect(() => {
-        changeGameLevel(gameLevel);
-    }, [1])
+        // controlla lo stato della partita per assegnare la vittoria
+        if (
+            // la partita è cominciata
+            started &&
+            // ogni casella ha assunto il suo valore finale
+            gameFieldCells.every(el => el.value === el.finalValue) &&
+            // ogni modificatore attivo ha un valore compreso tra -9 e 9
+            gameModifiers.every(el => !el.active || (el.value <= 9 && el.value >= -9))
+        ) {
+            // imposta la partita come vinta
+            setVictory(true)
+            // imposta la vittoria come impeccabile se il numero di mosse fatte
+            // è minore o uguale al numero di modificatori
+            setFlawlessVictory(moves <= difficultiesLevels[gameLevel].filter(el => el).length);
+            //interrompe il timer
+            stopTimer();
+        }
+    }, [gameFieldCells])
 
+    // al cambio del modificatore scelto
     useEffect(() => {
-        console.log("chosen modifier", chosenModifier)
-
-        setGameModifiers(cells => {
-            const newCells = [...cells].map(el => ({
-                ...el,
-                chosen: false
-            }));
-
-            if (chosenModifier !== null) {
-                newCells[chosenModifier].chosen = true;
-            }
-
-            return newCells;
-        })
-
+        // se la partita è cominciata imposta un modificatore come selezionato
+        // se corrisponde a quello effettivamente selezionato
+        started && setGameModifiers([...gameModifiers].map((el, pos) => ({...el, chosen: pos === chosenModifier})));
     }, [chosenModifier])
-
-    useEffect(() => {
-        console.log(movesDone)
-    }, [movesDone])
     //endregion
 
     //region handlers
-    const changeGameLevel = (level) => {
 
-        const newGameModifiers = getInitialsModifiers(level);
-
+    const restartGame = () => {
+        // crea nuove caselle e modificatori
         const newGameFieldCells = [...getInitialGameFiledCells()];
+        const newGameModifiers = [...getInitialsModifiers(gameLevel)].map(mod => ({
+            ...mod, value: mod.active ? Math.ceil(Math.random() * 9999) % 18 - 9 : null
+        }));
 
-        [...newGameModifiers].map(mod => {
-            mod.value = mod.active ? Math.ceil(Math.random() * 9999) % 18 - 9 : null;
-            return mod;
-        }).forEach(mod => {
+        newGameModifiers.forEach(mod => {
+            //assegna i valori dei modificatori alle caselle
             mod.modify.forEach(cellPos => {
                 newGameFieldCells[cellPos].value += mod.value;
             })
+            // riporta allo stato iniziale i modificatori
             mod.value = mod.active ? 0 : null;
-        })
+        });
 
-        setGameLevel(level)
-
+        // imposta tutti gli stati necessari per cominciare la partita
         setGameModifiers(newGameModifiers);
-
-        setMoves(0);
+        setGameFieldCells(newGameFieldCells);
         setChosenModifier(null);
-        setTimePassed(0);
+        setStarted(true);
         setVictory(false);
         setFlawlessVictory(false);
-
-        setGameFieldCells(newGameFieldCells)
+        setMoves(0);
+        resetTimer();
     }
 
+    // cambia il livello del gioco
+    const changeGameLevel = (level) => {
+        setGameLevel(level)
+    }
+
+    // aggiunge lo stato di "evidenziata" a un gruppo di caselle
     const highlightCells = (cellsPos) => {
-        setGameFieldCells(cells => {
-
-            const newCells = [...cells];
-
-            cellsPos.forEach(pos => {
-                newCells[pos].highlighted = true
-            });
-
-            return newCells;
-        })
+        setGameFieldCells(cells => [...cells].map((cell, pos) => ({
+            ...cell, highlighted: cellsPos.includes(pos)
+        })))
     }
 
-    const removeHighlightCells = (cellsPos) => {
-        setGameFieldCells(cells => {
-
-            const newCells = [...cells];
-
-            cellsPos.forEach(pos => {
-                newCells[pos].highlighted = false
-            });
-
-            return newCells;
-        })
+    // rimuove lo stato di "evidenziata" da tutte le caselle
+    const removeHighlightCells = () => {
+        setGameFieldCells(cells => [...cells].map(cell => ({...cell, highlighted: false})))
     }
 
-    const highlightModifiers = (cellPos) => () => {
-        setGameModifiers(
-            cells =>
-                [...cells].map(mod => ({
-                    ...mod,
-                    highlighted: mod.modify.includes(cellPos) && mod.active
-                }))
-        )
-    }
+    // aggiunge lo stato di "evidenziata" a un gruppo di modificatori
+    const highlightModifiers = (cellPos) => {
+        setGameModifiers([...gameModifiers].map(mod => ({
+            ...mod, highlighted: mod.modify.includes(cellPos) && mod.active
+        })))
+    };
 
+    // rimuove lo stato di "evidenziata" da tutti i modificatori
     const removeHighlightModifiers = () => {
-        setGameModifiers(
-            cells =>
-                [...cells].map(mod => ({
-                    ...mod,
-                    highlighted: false
-                }))
-        )
+        setGameModifiers([...gameModifiers].map(mod => ({...mod, highlighted: false})))
     }
 
+    // annulla l'ultima mossa
     const undoMove = () => {
+        //prende l'ultima mossa non annullata
         let toUndo = [...movesDone].reverse().findIndex(move => !move.undone);
 
+        // se ce n'è una la mette in stato di annullata
+        // applica la mossa alla partita
         if (toUndo > -1) {
-
             toUndo = movesDone.length - toUndo - 1;
-
             const newMovesDone = [...movesDone];
-
             newMovesDone[toUndo].undone = true;
-
             setMovesDone(newMovesDone);
-
             addModifierValue(newMovesDone[toUndo].modifier, -newMovesDone[toUndo].value, true)
         }
     }
 
+    // aggiunge un valore a un modificatore e al gruppo di caselle a cui è legato
     const addModifierValue = (modifierPos, valueToAdd, undone = false) => {
+        // copia caselle e modificatori
         const newModifiers = [...gameModifiers];
         const newCells = [...gameFieldCells];
 
+        // aggiunge il valore al modificatore scelto
         newModifiers[modifierPos].value += valueToAdd;
+        // aggiunge il valore a tutte le caselle a cui il modificatore è legato
         gameModifiers[modifierPos].modify.forEach(cellPos => {
             newCells[cellPos].value += valueToAdd;
         })
 
+        // aggiunge la mossa allo storico
+        setMovesDone([...movesDone, {
+            modifier: modifierPos, value: valueToAdd, time: (new Date()).toISOString(), undone
+        }]);
+
+        // incrementa le mosse effettuate
+        setMoves(actMoves => ++actMoves)
+
+        // reimposta il modificatore attivo
         setChosenModifier(null);
+
+        // applica i nuovi valori allo stato
+        // dei modificatori e delle caselle
         setGameModifiers(newModifiers);
         setGameFieldCells(newCells);
-        setMoves(actMoves => ++actMoves)
-        setMovesDone([...movesDone, {
-            modifier: modifierPos,
-            value: valueToAdd,
-            time: (new Date()).toISOString(),
-            undone
-        }]);
     }
 
-    const onAddModifierValue = pos => () => {
-        if (chosenModifier !== null) {
-            console.log("modify", chosenModifier, "with", pos);
-            addModifierValue(chosenModifier, values[pos]);
-        }
+    // handler per l'aggiunta di un valore al modificare scelto
+    const onAddModifierValue = pos => {
+        if (chosenModifier !== null) addModifierValue(chosenModifier, values[pos]);
     };
 
-    const chooseModifier = (pos) => () => {
-        if (gameModifiers?.[pos]?.active)
-            setChosenModifier(pos);
+    // imposta il modificatore scelto
+    const onChooseModifier = (pos) => {
+        if (gameModifiers?.[pos]?.active) setChosenModifier(pos);
+    };
+
+    // inverte il segno dei valori che si possono utilizzare
+    const onInvertValues = () => {
+        setValues([...values].map(val => -val));
     }
-
-    const invertValues = () => {
-        setValues(actValues => [...actValues].map(val => -val));
-    }
-    //endregion
-
-    //region factories
-    const makeGameCell = pos =>
-        <GameFieldCell
-            onOver={highlightModifiers(pos)}
-            onOut={removeHighlightModifiers}
-            cell={gameFieldCells[pos]}
-        />
-
-    const makeModCell = (pos) =>
-        <GameModifierCell
-            onClick={chooseModifier(pos)}
-            onOut={removeHighlightCells}
-            onOver={highlightCells}
-            cell={gameModifiers[pos]}
-        />;
-    const makeModifierValue = pos => <div className={`box idle values ${chosenModifier !== null ? 'active' : ''}`} onClick={onAddModifierValue(pos)}>{values[pos]}</div>
     //endregion
 
     //region render
     return <div>
-        <div className="flex column table">
-            <div className="flex" id="row-1">
-                <div className="box"></div>
-                {makeModCell(0)}
-                {makeModCell(1)}
-                {makeModCell(2)}
-                {makeModCell(3)}
-                <div className="box"></div>
-            </div>
-            <div className="flex" id="row-2">
-                {makeModCell(4)}
-                {makeGameCell(0)}
-                {makeGameCell(1)}
-                {makeGameCell(2)}
-                {makeGameCell(3)}
-                <div className="box"></div>
-            </div>
-            <div className="flex" id="row-3">
-                {makeModCell(5)}
-                {makeGameCell(4)}
-                {makeGameCell(5)}
-                {makeGameCell(6)}
-                {makeGameCell(7)}
-                {makeModCell(8)}
-            </div>
-            <div className="flex" id="row-4">
-                {makeModCell(6)}
-                {makeGameCell(8)}
-                {makeGameCell(9)}
-                {makeGameCell(10)}
-                {makeGameCell(11)}
-                {makeModCell(9)}
-            </div>
-            <div className="flex" id="row-5">
-                {makeModCell(7)}
-                {makeGameCell(12)}
-                {makeGameCell(13)}
-                {makeGameCell(14)}
-                {makeGameCell(15)}
-                {makeModCell(10)}
-            </div>
-            <div className="flex" id="row-6">
-                <div className="box"></div>
-                <div className="box"></div>
-                {makeModCell(11)}
-                {makeModCell(12)}
-                {makeModCell(13)}
-                {makeModCell(14)}
-            </div>
-        </div>
-        <div className="flex column table">
-            <div className="flex">
-                <div className={`box idle values active`} onClick={invertValues}>-</div>
-                {makeModifierValue(0)}
-                {makeModifierValue(1)}
-                {makeModifierValue(2)}
-            </div>
-            <div className="flex">
-                <div className={`box idle values ${movesDone.filter(el => !el.undone).length > 0 ? 'active' : ''}`} onClick={undoMove}>U</div>
-                {makeModifierValue(3)}
-                {makeModifierValue(4)}
-                {makeModifierValue(5)}
-            </div>
-            <div className="flex">
-                <div className="box"></div>
-                {makeModifierValue(6)}
-                {makeModifierValue(7)}
-                {makeModifierValue(8)}
-            </div>
-            <div className="flex">
-                <div className="line-box idle">{victory ? flawlessVictory ? "Flawless Victory!" : "Victory!" : "Playing..."}</div>
-            </div>
-            <div className="flex">
-                <div className="line-box idle values">Moves: {moves} - Sec. {timePassed}</div>
-            </div>
-            <div className="flex">
-                <div className="box">L</div>
-                <div onClick={() => changeGameLevel(0)} className="box">1</div>
-                <div onClick={() => changeGameLevel(1)} className="box">2</div>
-                <div onClick={() => changeGameLevel(2)} className="box">3</div>
-            </div>
-        </div>
+        <GameGridContainer
+            playing={started && !victory}
+            gameModifiers={gameModifiers}
+            chooseModifier={onChooseModifier}
+            gameFieldCells={gameFieldCells}
+            highlightCells={highlightCells}
+            highlightModifiers={highlightModifiers}
+            removeHighlightCells={removeHighlightCells}
+            removeHighlightModifiers={removeHighlightModifiers}
+        />
+        <GameHelpersContainer
+            flawlessVictory={flawlessVictory}
+            victory={victory}
+            chosenModifier={chosenModifier}
+            timePassed={timePassed}
+            moves={moves}
+            onAddModifierValue={onAddModifierValue}
+            values={values}
+            movesDone={movesDone}
+            changeGameLevel={changeGameLevel}
+            invertValues={onInvertValues}
+            undoMove={undoMove}
+            playing={started && !victory}
+            started={started}
+            gameLevel={gameLevel}
+            restart={restartGame}
+        />
     </div>;
     //endregion
 };

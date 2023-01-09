@@ -223,3 +223,14 @@ L'interfaccia necessità di:
 - alternativa alla tastiera completa può essere una tastiera da 1 a 9 con un tasto "-" per fare il toggle tra valori positivi e negativi
 - un tasto reset per il singolo modificatore (riportandolo a 0)
 - un tasto reset per tutti i modificatori (riportandoli tutti a 0)
+
+
+
+Idee (TODO)
+- statistiche su numero di partite, vittorie, livelli giocati
+- numero di modificatori dinamico (con strati concentrici)
+- valori da aggiungere random
+- modalità di gioco (regolare, one-way - i valori cambiano in base al modificatore scelto e puoi selezionare il valore una volta sola)
+- partite multigiocatore coop
+- partite multigiocatore pvp
+- partite multigiocatore roulette russa

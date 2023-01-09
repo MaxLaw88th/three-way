@@ -6,6 +6,9 @@ export const getInitialGameFiledCells = () => range(1, 17).map(value => ({
     highlighted: false,
     chosen: false,
 }));
+
+export const initialGameFieldCells = getInitialGameFiledCells();
+
 const makeModifier = ({active, modify, value = 0, highlighted = false}) => ({
     value,
     active,
@@ -13,9 +16,9 @@ const makeModifier = ({active, modify, value = 0, highlighted = false}) => ({
     highlighted
 });
 export const difficultiesLevels = [
-    [true, true, true, true, true, true, false, false, false, false, false, false, false, false,],
-    [true, true, true, true, true, true, true, true, true, false, false, false, false, false,],
-    [true, true, true, true, true, true, true, true, true, true, true, true, true, false,],
+    [true, true, true, true, true, true, false, false, false, false, false, false, false, false, true],
+    [true, true, true, true, true, true, true, true, true, false, false, false, false, false, true],
+    [true, true, true, true, true, true, true, true, true, true, true, true, true, true, true],
 ];
 export const getInitialsModifiers = (level) => {
 
@@ -23,7 +26,7 @@ export const getInitialsModifiers = (level) => {
 
     return [
 
-        //columns modifiers
+        //region columns modifiers
         makeModifier({
             value: 0,
             active: difficultiesRandom[0],
@@ -48,8 +51,9 @@ export const getInitialsModifiers = (level) => {
             modify: [3, 7, 11, 15],
             highlighted: false,
         }),
+        //endregion
 
-        //row modifiers
+        //region row modifiers
         makeModifier({
             value: 0,
             active: difficultiesRandom[4],
@@ -74,8 +78,9 @@ export const getInitialsModifiers = (level) => {
             modify: [12, 13, 14, 15],
             highlighted: false,
         }),
+        //endregion
 
-        //diagonals modifiers
+        //region diagonals modifiers
         makeModifier({
             value: 0,
             active: difficultiesRandom[8],
@@ -118,5 +123,9 @@ export const getInitialsModifiers = (level) => {
             modify: [0, 5, 10, 15],
             highlighted: false,
         }),
+        //endregion
     ];
 };
+
+
+export const initialModifiers = getInitialsModifiers(0);
