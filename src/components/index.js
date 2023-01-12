@@ -9,4 +9,4 @@ export {GameRow} from './GameRow';
 export {IdleCell} from './IdleCell';
 export {GameGridContainer} from './GameGridContainer';
 export {GameHelpersContainer} from './GameHelpersContainer';
-export {ModifierValue, SpecialModifierValue} from './ModifierValue';
+export {ModifierValue, UndoModifierValue, MinusModifierValue} from './ModifierValue';

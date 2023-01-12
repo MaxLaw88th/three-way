@@ -1,6 +1,8 @@
 import {ThemedElement} from "./ThemedElement";
+import {connect} from "react-redux";
+import {chooseModifier, highlightFields, removeHighlightFields} from "../store/slices/gameCells.js";
 
-export const GameModifierCell = ({onOver, onOut, onClick, cell: {value, active, modify, highlighted, chosen}}) =>
+export const GameModifierCellStateless = ({onOver, onOut, onClick, cell: {value, active, modify}, chosen, highlighted}) =>
     <ThemedElement
         box
         idle
@@ -16,3 +18,16 @@ export const GameModifierCell = ({onOver, onOut, onClick, cell: {value, active, 
     >
         {value}
     </ThemedElement>
+
+
+export const GameModifierCell = connect((state, {modifierIndex}) => ({
+    cell: state.gameCells.modifiers[modifierIndex],
+    highlighted: state.gameCells.highlightedModifiers.includes(modifierIndex),
+    chosen: state.gameCells.activeModifier === modifierIndex
+}), (dispatch, {modifierIndex}) => ({
+    onOver: (cells) => dispatch(highlightFields(cells)),
+    onOut: () => dispatch(removeHighlightFields()),
+    onClick: () => {
+        dispatch(chooseModifier(modifierIndex));
+    }
+}))(GameModifierCellStateless);

@@ -1,13 +1,16 @@
 import {useState} from "react";
 import {useInterval} from "./useInterval.jsx";
+import {useDispatch, useSelector} from "react-redux";
+import {resetTimer, timerTick} from "../store/slices/gameState.js";
 
 export const useTimer = () => {
-    const [timePassed, setTimePassed] = useState(0);
+    const dispatch = useDispatch();
+    const {timePassed} = useSelector(state => state.gameState);
 
     const [delay, setDelay] = useState(null);
 
     useInterval(() => {
-        setTimePassed(actTime => ++actTime)
+        dispatch(timerTick());
     }, delay);
 
     const startTimer = () => {
@@ -18,10 +21,10 @@ export const useTimer = () => {
         setDelay(null);
     }
 
-    const resetTimer = () => {
-        setTimePassed(0);
+    const onResetTimer = () => {
+        dispatch(resetTimer());
         startTimer();
     }
 
-    return [timePassed, startTimer, stopTimer, resetTimer];
+    return [timePassed, startTimer, stopTimer, onResetTimer];
 }

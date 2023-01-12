@@ -18,7 +18,8 @@ export const ThemedElement = (
         gameCell = false,
         lineBox = false,
         resolved = false,
-        restart=false,
+        restart = false,
+        dispatch = null,
         Component,
         children,
         ...props
