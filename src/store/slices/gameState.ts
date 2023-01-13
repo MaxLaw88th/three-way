@@ -1,6 +1,7 @@
-import {createSlice} from "@reduxjs/toolkit";
+import {createSlice, PayloadAction} from "@reduxjs/toolkit";
+import {GameState, MoveDone} from "../../types";
 
-const initialState = {
+const initialState: GameState = {
     started: false,
     moves: 0,
     victory: false,
@@ -26,7 +27,7 @@ export const gameStateSlice = createSlice({
         resetMoves: state => {
             state.moves = 0;
         },
-        setVictory: (state, action) => {
+        setVictory: (state, action: PayloadAction<boolean>) => {
             state.victory = true;
             state.flawlessVictory = action.payload;
         },
@@ -40,25 +41,38 @@ export const gameStateSlice = createSlice({
         resetTimer: state => {
             state.timePassed = 0;
         },
-        chooseLevel: (state, action) => ({
+        chooseLevel: (state, action: PayloadAction<number>) => ({
             ...initialState,
             gameLevel: action.payload,
             started: true
         }),
-        resetLevel: (state, action) => ({
+        resetLevel: (state, action: PayloadAction<number>) => ({
             ...initialState,
             started: true,
             gameLevel: action.payload
         }),
-        addMovesDone: (state, action) => {
+        addMovesDone: (state, action: PayloadAction<MoveDone>) => {
             state.movesDone.push(action.payload);
         },
-        setMoveUndone: (state, action) => {
+        setMoveUndone: (state, action: PayloadAction<number>) => {
             state.movesDone[action.payload].undone = true;
         }
     }
 });
 
-export const {resetVictory, setMoveUndone, resetLevel, doMove, resetMoves, setVictory, startGame, stopGame, resetTimer, timerTick, chooseLevel, addMovesDone} = gameStateSlice.actions;
+export const {
+    resetVictory,
+    setMoveUndone,
+    resetLevel,
+    doMove,
+    resetMoves,
+    setVictory,
+    startGame,
+    stopGame,
+    resetTimer,
+    timerTick,
+    chooseLevel,
+    addMovesDone
+} = gameStateSlice.actions;
 
 export default gameStateSlice.reducer;

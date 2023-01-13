@@ -1,6 +1,7 @@
 import React from "react";
 import {GameGridFog} from "./GameGridFog";
 import classNames from "classnames";
+import {ThemedElementProps} from "../types";
 
 export const ThemedElement = (
     {
@@ -23,7 +24,7 @@ export const ThemedElement = (
         Component,
         children,
         ...props
-    }) => React.createElement(Component, {
+    }: ThemedElementProps) => React.createElement(Component, {
     className: `${classNames({
         flex,
         column,

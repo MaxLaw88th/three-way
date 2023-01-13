@@ -1,8 +1,8 @@
-import {GameGridWithFog} from "./GameGrid.jsx";
-import {GameRow} from "./GameRow.jsx";
-import {IdleCell} from "./IdleCell.jsx";
-import {GameModifierCell} from "./GameModifierCell.jsx";
-import {GameFieldCell} from "./GameFieldCell.jsx";
+import {GameGridWithFog} from "./GameGrid";
+import {GameRow} from "./GameRow";
+import {IdleCell} from "./IdleCell";
+import {GameModifierCell} from "./GameModifierCell";
+import {GameFieldCell} from "./GameFieldCell";
 
 export const GameGridContainer = () => <>
     <GameGridWithFog>

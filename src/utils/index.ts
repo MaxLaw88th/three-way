@@ -1,26 +1,27 @@
 import {range, shuffle} from "lodash";
+import {FieldCell, ModifierCell} from "../types";
 
-export const getInitialGameFiledCells = () => range(1, 17).map(value => ({
+export const getInitialGameFiledCells = (): FieldCell[] => range(1, 17).map(value => ({
     value: value,
     finalValue: value,
     highlighted: false,
     chosen: false,
 }));
 
-export const initialGameFieldCells = getInitialGameFiledCells();
+export const initialGameFieldCells: FieldCell[] = getInitialGameFiledCells();
 
-const makeModifier = ({active, modify, value = 0, highlighted = false}) => ({
+const makeModifier = ({active, modify, value = null, highlighted = false}: ModifierCell): ModifierCell => ({
     value,
     active,
     modify,
     highlighted
 });
-export const difficultiesLevels = [
+export const difficultiesLevels: boolean[][] = [
     [true, true, true, true, true, true, false, false, false, false, false, false, false, false, true],
     [true, true, true, true, true, true, true, true, true, false, false, false, false, false, true],
     [true, true, true, true, true, true, true, true, true, true, true, true, true, true, true],
 ];
-export const getInitialsModifiers = (level) => {
+export const getInitialsModifiers = (level: number): ModifierCell[] => {
 
     const difficultiesRandom = shuffle([...difficultiesLevels[level]]);
 
@@ -128,4 +129,4 @@ export const getInitialsModifiers = (level) => {
 };
 
 
-export const initialModifiers = getInitialsModifiers(0);
+export const initialModifiers: ModifierCell[] = getInitialsModifiers(0);

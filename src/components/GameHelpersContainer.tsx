@@ -1,10 +1,10 @@
-import {GameGrid} from "./GameGrid.jsx";
-import {GameRow, GameRowWithFog} from "./GameRow.jsx";
-import {MinusModifierValue, ModifierValue, UndoModifierValue} from "./ModifierValue.jsx";
-import {IdleCell} from "./IdleCell.jsx";
-import {VictoryLineBox} from "./VictoryLineBox.jsx";
-import {GameMovesAndTimer} from "./GameMovesAndTimer.jsx";
-import {LevelChangeBox} from "./LevelChangeBox.jsx";
+import {GameGrid} from "./GameGrid";
+import {GameRow, GameRowWithFog} from "./GameRow";
+import {MinusModifierValue, ModifierValue, UndoModifierValue} from "./ModifierValue";
+import {IdleCell} from "./IdleCell";
+import {VictoryLineBox} from "./VictoryLineBox";
+import {GameMovesAndTimer} from "./GameMovesAndTimer";
+import {LevelChangeBox} from "./LevelChangeBox";
 
 export const GameHelpersContainer = () => <>
     <GameGrid>

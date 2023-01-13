@@ -1,11 +1,14 @@
 import {createSlice} from "@reduxjs/toolkit";
-import {chooseLevel, resetLevel, setVictory} from "./gameState.js";
+import {chooseLevel, resetLevel, setVictory} from "./gameState";
+import {TimerState} from "../../types";
+
+const initialState: TimerState = {
+    passed: 0,
+    running: false
+};
 
 export const timerSlice = createSlice({
-    initialState: {
-        passed: 0,
-        running: false
-    },
+    initialState,
     name: "timer",
     reducers: {
         start: state => {

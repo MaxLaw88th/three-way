@@ -1,8 +1,11 @@
-import {getInitialGameFiledCells, getInitialsModifiers, initialGameFieldCells, initialModifiers} from "../../utils/index.jsx";
-import {createSlice} from "@reduxjs/toolkit";
-import {chooseLevel, resetLevel} from "./gameState.js";
+import {getInitialGameFiledCells, getInitialsModifiers, initialGameFieldCells, initialModifiers} from "../../utils";
+import {createSlice, PayloadAction} from "@reduxjs/toolkit";
+import {chooseLevel, resetLevel} from "./gameState";
+import {GameCellsState, ModifierCell} from "../../types";
 
-const initialState = {
+export type AddModifierValuePayload = { value: number, modifier: number };
+
+const initialState: GameCellsState = {
     fields: [...initialGameFieldCells],
     modifiers: [...initialModifiers],
     activeModifier: null,
@@ -10,16 +13,16 @@ const initialState = {
     highlightedModifiers: [],
 }
 
-const resetState = gameLevel => {
+const resetState = (gameLevel: number): GameCellsState => {
     const newGameFieldCells = [...getInitialGameFiledCells()];
-    const newGameModifiers = [...getInitialsModifiers(gameLevel)].map(mod => ({
+    const newGameModifiers: ModifierCell[] = [...getInitialsModifiers(gameLevel)].map(mod => ({
         ...mod, value: mod.active ? Math.ceil(Math.random() * 9999) % 18 - 9 : null
     }));
 
     newGameModifiers.forEach(mod => {
         //assegna i valori dei modificatori alle caselle
-        mod.modify.forEach(cellPos => {
-            newGameFieldCells[cellPos].value += mod.value;
+        mod.modify.forEach((cellPos: number) => {
+            newGameFieldCells[cellPos].value += mod.value ?? 0;
         })
         // riporta allo stato iniziale i modificatori
         mod.value = mod.active ? 0 : null;
@@ -58,12 +61,13 @@ export const gameCellsSlice = createSlice({
                 state.activeModifier = action.payload;
             }
         },
-        addModifierValue: (state, action) => {
+        addModifierValue: (state, action: PayloadAction<AddModifierValuePayload>) => {
             const valueToAdd = action.payload.value;
             const modifier = action.payload.modifier;
 
-            if (modifier === null) return;
-            state.modifiers[modifier].value += valueToAdd;
+            if (modifier !== null) {
+                (state.modifiers[modifier].value as number) += valueToAdd;
+            }
 
             state.modifiers[modifier].modify.forEach(fieldCellPos => {
                 state.fields[fieldCellPos].value += valueToAdd;
@@ -78,6 +82,14 @@ export const gameCellsSlice = createSlice({
     }
 });
 
-export const {addModifierValue, chooseModifier, highlightFields, removeHighlightFields, highlightModifiers, removeHighlightModifiers, resetCells} = gameCellsSlice.actions;
+export const {
+    addModifierValue,
+    chooseModifier,
+    highlightFields,
+    removeHighlightFields,
+    highlightModifiers,
+    removeHighlightModifiers,
+    resetCells
+} = gameCellsSlice.actions;
 
 export default gameCellsSlice.reducer;

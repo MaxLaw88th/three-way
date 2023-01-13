@@ -1,10 +1,18 @@
 import {ThemedElement} from "./ThemedElement";
 import {connect} from "react-redux";
-import {invertValues} from "../store/slices/modifierValues.js";
-import {addMovesDone, doMove, setMoveUndone} from "../store/slices/gameState.js";
-import {addModifierValue} from "../store/slices/gameCells.js";
+import {invertValues} from "../store/slices/modifierValues";
+import {addMovesDone, doMove, setMoveUndone} from "../store/slices/gameState";
+import {addModifierValue, AddModifierValuePayload} from "../store/slices/gameCells";
+import {MoveDone, RootState} from "../types";
+import React, {PropsWithChildren} from "react";
 
-export const ModifierValueStateless = ({chosenModifier, onAddModifierValue, value}) =>
+type ModifierValueStatelessProps = {
+    chosenModifier: number | null,
+    onAddModifierValue: () => void,
+    value: number
+}
+
+export const ModifierValueStateless = ({chosenModifier, onAddModifierValue, value}: ModifierValueStatelessProps) =>
     <ThemedElement
         box idle values active={chosenModifier !== null}
         Component="div"
@@ -13,20 +21,30 @@ export const ModifierValueStateless = ({chosenModifier, onAddModifierValue, valu
         {value}
     </ThemedElement>
 
+
+type ModifierValueProps = {
+    valueIndex: number, chosenModifier: number, value: number
+}
+
 export const ModifierValue =
     connect(
-        ({modifierValues, gameCells: {activeModifier}}, {valueIndex}) => ({
+        ({
+             modifierValues,
+             gameCells: {activeModifier}
+         }: RootState, {valueIndex}: Pick<ModifierValueProps, "valueIndex">) => ({
             value: modifierValues[valueIndex],
             chosenModifier: activeModifier,
         }),
-        (dispatch, {valueIndex, chosenModifier, value}) => ({
-            addMovesDone: (move) => dispatch(addMovesDone(move)),
+        (dispatch) => ({
+            addMovesDone: (move: MoveDone) => dispatch(addMovesDone(move)),
             doMove: () => dispatch(doMove()),
-            addModifierValue: ({value, modifier}) => dispatch(addModifierValue({value, modifier}))
+            addModifierValue: ({
+                                   value,
+                                   modifier
+                               }: AddModifierValuePayload) => dispatch(addModifierValue({value, modifier}))
         }),
-        (stateProps, {addMovesDone, doMove, addModifierValue}, ownProps) => ({
+        (stateProps, {addMovesDone, doMove, addModifierValue}) => ({
             ...stateProps,
-            ...ownProps,
             onAddModifierValue: () => {
                 const value = stateProps.value;
                 const modifier = stateProps.chosenModifier;
@@ -43,7 +61,16 @@ export const ModifierValue =
         })
     )(ModifierValueStateless);
 
-export const SpecialModifierValueStateless = ({active, onClick, children}) =>
+type SpecialModifierValueStatelessProps = {
+    active: boolean,
+    onClick: (event: React.MouseEvent<HTMLElement, MouseEvent>) => void
+}
+
+export const SpecialModifierValueStateless = ({
+                                                  active,
+                                                  onClick,
+                                                  children
+                                              }: PropsWithChildren<SpecialModifierValueStatelessProps>) =>
     <ThemedElement
         box idle values active={active}
         Component="div"
@@ -61,19 +88,21 @@ export const MinusModifierValue = connect(
 )(SpecialModifierValueStateless);
 
 export const UndoModifierValue = connect(
-    ({gameState: {started, victory, movesDone}}) => ({
+    ({gameState: {started, victory, movesDone}}: RootState) => ({
         active: started && !victory && movesDone.filter(el => !el.undone).length > 0,
         movesDone
     }),
-    (dispatch, {valueIndex, chosenModifier, value}) => ({
-        addMovesDone: (move) => dispatch(addMovesDone(move)),
+    (dispatch) => ({
+        addMovesDone: (move: MoveDone) => dispatch(addMovesDone(move)),
         doMove: () => dispatch(doMove()),
-        addModifierValue: ({value, modifier}) => dispatch(addModifierValue({value, modifier})),
-        setMoveUndone: (move) => dispatch(setMoveUndone(move))
+        addModifierValue: ({value, modifier}: AddModifierValuePayload) => dispatch(addModifierValue({
+            value,
+            modifier
+        })),
+        setMoveUndone: (move: number) => dispatch(setMoveUndone(move))
     }),
-    (stateProps, {addMovesDone, doMove, addModifierValue, setMoveUndone}, ownProps) => ({
+    (stateProps, {addMovesDone, doMove, addModifierValue, setMoveUndone}) => ({
         ...stateProps,
-        ...ownProps,
         onClick: () => {
             let toUndo = [...stateProps.movesDone].reverse().findIndex(move => !move.undone);
 
@@ -85,11 +114,9 @@ export const UndoModifierValue = connect(
 
                 setMoveUndone(toUndo);
 
-                // aggiunge la mossa allo storico
                 addMovesDone({
                     modifier, value, time: (new Date()).toISOString(), undone: true
                 });
-                // incrementa le mosse effettuate
                 doMove();
                 addModifierValue({value, modifier});
             }
